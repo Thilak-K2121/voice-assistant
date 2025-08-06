@@ -1,10 +1,10 @@
 // ignore_for_file: unused_import, sort_child_properties_last
 
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:voice_assistant/feature_list.dart';
 import 'package:voice_assistant/pallete.dart';
-// import 'package:speech_to_text/speech_to_text.dart';
-
+import 'package:speech_to_text/speech_to_text.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,7 +14,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // final speechToText = SpeechToText();
+  final speechToText = SpeechToText();
+  String lastWords = '';
   @override
   void initState() {
     super.initState();
@@ -22,8 +23,32 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> initSpeechToText() async {
-    
+    await speechToText.initialize();
+    setState(() {});
   }
+
+  Future<void> startListening() async {
+    await speechToText.listen(onResult: onSpeechResult);
+    setState(() {});
+  }
+
+  /// Manually stop the active speech recognition session
+  /// Note that there are also timeouts that each platform enforces
+  /// and the SpeechToText plugin supports setting timeouts on the
+  /// listen method.
+  Future<void> stopListening() async {
+    await speechToText.stop();
+    setState(() {});
+  }
+
+  /// This is the callback that the SpeechToText plugin calls when
+  /// the platform returns recognized words.
+  void onSpeechResult(SpeechRecognitionResult result) {
+    setState(() {
+      lastWords = result.recognizedWords;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.symmetric(vertical: 10.0),
                 child: Text(
                   'Hello , Good morning , How can I help?',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Pallete.mainFontColor,
                     fontSize: 25,
                     fontFamily: 'Cera Pro',
@@ -132,9 +157,19 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.mic, color: Colors.black),
-        backgroundColor: Color.fromRGBO(209, 243, 249, 1),
+        onPressed: () async {
+          if (speechToText.isListening) {
+            await stopListening();
+          } else {
+            if (await speechToText.hasPermission) {
+              await startListening();
+            } else {
+              await initSpeechToText(); // will request permission if needed
+            }
+          }
+        },
+        child: const Icon(Icons.mic, color: Colors.black),
+        backgroundColor: const Color.fromRGBO(209, 243, 249, 1),
       ),
     );
   }
