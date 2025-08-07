@@ -3,11 +3,11 @@
 
 Svara is a sleek, modern voice assistant for Android & iOS, built with Flutter and powered by Google's Gemini API. Engage in natural conversations, set custom personalities for the assistant, and get answers in multiple languages.
 
-\<br\>
+
 
 <img width="528" height="1151" alt="image" src="https://github.com/user-attachments/assets/b3600aa9-a561-4234-94af-f55bbb30b0b0" />
 
-\`\`
+
 
 -----
 
